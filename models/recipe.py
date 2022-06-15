@@ -1,15 +1,5 @@
 from extensions import db
 
-recipe_list = []
-
-def get_last_id():
-    last_recipe = Recipe.query.order_by(Recipe.id.desc()).first()
-
-    if last_recipe is None:
-        return 1
-
-    return last_recipe.id + 1
-
 class Recipe(db.Model):
 
     __tablename__ = 'recipe'
@@ -27,7 +17,6 @@ class Recipe(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
     def __init__(self, name, description, num_of_servings, cook_time, directions, user_id):
-        # self.id = get_last_id()
         self.name = name
         self.description = description
         self.num_of_servings = num_of_servings
@@ -46,3 +35,19 @@ class Recipe(db.Model):
             'cook_time': self.cook_time,
             'directions': self.directions
         }
+
+    @classmethod
+    def get_all_published(cls):
+        return cls.query.filter_by(is_publish=True).all()
+
+    @classmethod
+    def get_by_id(cls, recipe_id):
+        return cls.query.filter_by(id=recipe_id).first()
+
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
